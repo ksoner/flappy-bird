@@ -33,7 +33,8 @@
         let score = 0;
         let gameStarted = false;
         let gameOver = false;
-        let pipeSpeed = 2;  // Pozitif başlangıç hızı
+        let pipeSpeed = 2;
+        let nextPipeFrame = 0;  // Yeni değişken
 
         function createPipe() {
             const pipeHeight = Math.floor(Math.random() * (canvas.height - pipeGap - 150)) + 75;
@@ -67,7 +68,8 @@
             pipes.length = 0;
             score = 0;
             frameCount = 0;
-            pipeSpeed = 2;  // Hız sıfırlanıyor
+            pipeSpeed = 2;
+            nextPipeFrame = 0;  // Sıfırlanıyor
             gameOver = false;
             gameStarted = true;
         }
@@ -79,7 +81,7 @@
             if (!gameStarted && !gameOver) {
                 ctx.fillStyle = 'black';
                 ctx.font = '30px Arial';
-                ctx.fillText('Press SPACE1 to Start', canvas.width/2 - 150, canvas.height/2);
+                ctx.fillText('Press SPACE2 to Start', canvas.width/2 - 150, canvas.height/2);
             } else if (gameOver) {
                 ctx.fillStyle = 'red';
                 ctx.font = '40px Arial';
@@ -94,17 +96,19 @@
                 ctx.fillStyle = 'yellow';
                 ctx.fillRect(bird.x, bird.y, bird.width, bird.height);
 
-                if (frameCount % 150 === 0) {
+                if (frameCount >= nextPipeFrame) {
                     createPipe();
+                    const minGap = Math.max(75, 150 - pipeSpeed * 5);
+                    const maxGap = Math.max(100, 200 - pipeSpeed * 5);
+                    nextPipeFrame = frameCount + minGap + Math.random() * (maxGap - minGap);
                 }
 
-                // Hızı zamanla artır (her 500 frame'de 1 hız artışı, maksimum 10)
                 if (frameCount % 500 === 0 && pipeSpeed < 10) {
                     pipeSpeed += 1;
                 }
 
                 for (let i = pipes.length - 1; i >= 0; i--) {
-                    pipes[i].x -= pipeSpeed;  // Doğru yön: soldan sağa
+                    pipes[i].x -= pipeSpeed;
 
                     ctx.fillStyle = 'pink';
                     ctx.fillRect(pipes[i].x, 0, pipeWidth, pipes[i].top);
