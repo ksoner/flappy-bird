@@ -28,11 +28,12 @@
 
         const pipes = [];
         const pipeWidth = 80;
-        const pipeGap = 250;  // Artırılmış boşluk
+        const pipeGap = 250;
         let frameCount = 0;
         let score = 0;
         let gameStarted = false;
         let gameOver = false;
+        let pipeSpeed = 2;  // Başlangıç hızı
 
         function createPipe() {
             const pipeHeight = Math.floor(Math.random() * (canvas.height - pipeGap - 150)) + 75;
@@ -66,6 +67,7 @@
             pipes.length = 0;
             score = 0;
             frameCount = 0;
+            pipeSpeed = 2;  // Hız sıfırlanıyor
             gameOver = false;
             gameStarted = true;
         }
@@ -96,10 +98,15 @@
                     createPipe();
                 }
 
-                for (let i = pipes.length - 1; i >= 0; i--) {
-                    pipes[i].x -= 2;  // Hız artırıldı
+                // Hızı zamanla artır (her 500 frame'de 1 hız artışı, maksimum -10)
+                if (frameCount % 500 === 0 && pipeSpeed > -10) {
+                    pipeSpeed -= 1;
+                }
 
-                    ctx.fillStyle = 'pink';  // Pembe engeller
+                for (let i = pipes.length - 1; i >= 0; i--) {
+                    pipes[i].x += pipeSpeed;  // Değişken hız kullanılıyor
+
+                    ctx.fillStyle = 'pink';
                     ctx.fillRect(pipes[i].x, 0, pipeWidth, pipes[i].top);
                     ctx.fillRect(pipes[i].x, canvas.height - pipes[i].bottom, 
                                pipeWidth, pipes[i].bottom);
@@ -113,9 +120,11 @@
                     }
                 }
 
+                // Skor ve hızı göster
                 ctx.fillStyle = 'black';
                 ctx.font = '25px Arial';
                 ctx.fillText('Score: ' + score, 10, 40);
+                ctx.fillText('Speed: ' + Math.abs(pipeSpeed), 10, 70);
 
                 if (checkCollision()) {
                     gameOver = true;
