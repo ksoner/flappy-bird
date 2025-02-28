@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Flappy Bird Clone</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+/body>
+    <canvas id="gameCanvas" width="480" height="640"></canvas>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Oyun değişkenleri
+        const bird = {
+            x: 50,
+            y: 150,
+            width: 20,
+            height: 20,
+            gravity: 0.6,
+            lift: -15,
+            velocity: 0
+        };
+
+        const pipes = [];
+        const pipeWidth = 50;
+        const pipeGap = 150;
+        let frameCount = 0;
+        let score = 0;
+        let gameOver = false;
+
+        // Yeni boru oluşturma
+        function createPipe() {
+            const pipeHeight = Math.floor(Math.random() * (canvas.height - pipeGap - 100)) + 50;
+            pipes.push({
+                x: canvas.width,
+                top: pipeHeight,
+                bottom: canvas.height - pipeHeight - pipeGap
+            });
+        }
+
+        // Çarpışma kontrolü
+        function checkCollision() {
+            if (bird.y < 0 || bird.y + bird.height > canvas.height) {
+                return true;
+            }
+
+            for (let pipe of pipes) {
+                if (bird.x + bird.width > pipe.x && 
+                    bird.x < pipe.x + pipeWidth) {
+                    if (bird.y < pipe.top || 
+                        bird.y + bird.height > canvas.height - pipe.bottom) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        // Oyun döngüsü
+        function gameLoop() {
+            if (gameOver) {
+                ctx.fillStyle = 'red';
+                ctx.font = '30px Arial';
+                ctx.fillText('Game Over! Score: ' + score, 100, canvas.height/2);
+                return;
+            }
+
+            // Canvas'ı temizle
+            ctx.fillStyle = 'skyblue';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Kuş fiziksel
+            bird.velocity += bird.gravity;
+            bird.y += bird.velocity;
+
+            // Kuş çiz
+            ctx.fillStyle = 'yellow';
+            ctx.fillRect(bird.x, bird.y, bird.width, bird.height);
+
+            // Borular
+            if (frameCount % 100 === 0) {
+                createPipe();
+            }
+
+            for (let i = pipes.length - 1; i >= 0; i--) {
+                pipes[i].x -= 2;
+
+                // Boru çiz
+                ctx.fillStyle = 'green';
+                ctx.fillRect(pipes[i].x, 0, pipeWidth, pipes[i].top);
+                ctx.fillRect(pipes[i].x, canvas.height - pipes[i].bottom, 
+                           pipeWidth, pipes[i].bottom);
+
+                // Skor
+                if (pipes[i].x + pipeWidth === bird.x) {
+                    score++;
+                }
+
+                // Boru ekran dışına çıkarsa sil
+                if (pipes[i].x < -pipeWidth) {
+                    pipes.splice(i, 1);
+                }
+            }
+
+            // Skor göster
+            ctx.fillStyle = 'black';
+            ctx.font = '20px Arial';
+            ctx.fillText('Score: ' + score, 10, 30);
+
+            // Çarpışma kontrolü
+            if (checkCollision()) {
+                gameOver = true;
+            }
+
+            frameCount++;
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Kontroller
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                bird.velocity = bird.lift;
+            }
+        });
+
+        // Oyunu başlat
+        gameLoop();
+    </script>
+</body>
+</html>
