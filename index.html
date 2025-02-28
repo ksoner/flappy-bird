@@ -33,7 +33,7 @@
         let score = 0;
         let gameStarted = false;
         let gameOver = false;
-        let pipeSpeed = 2;  // Başlangıç hızı
+        let pipeSpeed = 2;  // Pozitif başlangıç hızı
 
         function createPipe() {
             const pipeHeight = Math.floor(Math.random() * (canvas.height - pipeGap - 150)) + 75;
@@ -79,7 +79,7 @@
             if (!gameStarted && !gameOver) {
                 ctx.fillStyle = 'black';
                 ctx.font = '30px Arial';
-                ctx.fillText('Press SPACE to Start', canvas.width/2 - 150, canvas.height/2);
+                ctx.fillText('Press SPACE1 to Start', canvas.width/2 - 150, canvas.height/2);
             } else if (gameOver) {
                 ctx.fillStyle = 'red';
                 ctx.font = '40px Arial';
@@ -98,13 +98,13 @@
                     createPipe();
                 }
 
-                // Hızı zamanla artır (her 500 frame'de 1 hız artışı, maksimum -10)
-                if (frameCount % 500 === 0 && pipeSpeed > -10) {
-                    pipeSpeed -= 1;
+                // Hızı zamanla artır (her 500 frame'de 1 hız artışı, maksimum 10)
+                if (frameCount % 500 === 0 && pipeSpeed < 10) {
+                    pipeSpeed += 1;
                 }
 
                 for (let i = pipes.length - 1; i >= 0; i--) {
-                    pipes[i].x += pipeSpeed;  // Değişken hız kullanılıyor
+                    pipes[i].x -= pipeSpeed;  // Doğru yön: soldan sağa
 
                     ctx.fillStyle = 'pink';
                     ctx.fillRect(pipes[i].x, 0, pipeWidth, pipes[i].top);
@@ -120,11 +120,10 @@
                     }
                 }
 
-                // Skor ve hızı göster
                 ctx.fillStyle = 'black';
                 ctx.font = '25px Arial';
                 ctx.fillText('Score: ' + score, 10, 40);
-                ctx.fillText('Speed: ' + Math.abs(pipeSpeed), 10, 70);
+                ctx.fillText('Speed: ' + pipeSpeed, 10, 70);
 
                 if (checkCollision()) {
                     gameOver = true;
