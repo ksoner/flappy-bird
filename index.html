@@ -23,7 +23,7 @@
             width: 30,
             height: 30,
             gravity: 0.3,
-            lift: -5, // Daha az zıplama
+            lift: -5,
             velocity: 0
         };
 
@@ -76,82 +76,80 @@
 
         // Oyun döngüsü
         function gameLoop() {
+            // Canvas'ı temizle
             ctx.fillStyle = 'skyblue';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            if (!gameStarted) {
+            if (!gameStarted && !gameOver) {
                 ctx.fillStyle = 'black';
                 ctx.font = '30px Arial';
                 ctx.fillText('Press SPACE to Start', canvas.width/2 - 150, canvas.height/2);
-                return;
-            }
-
-            if (gameOver) {
+            } else if (gameOver) {
                 ctx.fillStyle = 'red';
                 ctx.font = '40px Arial';
                 ctx.fillText('Game Over! Score: ' + score, canvas.width/2 - 200, canvas.height/2);
                 ctx.fillStyle = 'black';
                 ctx.font = '20px Arial';
                 ctx.fillText('Press SPACE to Restart', canvas.width/2 - 120, canvas.height/2 + 40);
-                return;
-            }
+            } else {
+                // Kuş fiziksel
+                bird.velocity += bird.gravity;
+                bird.y += bird.velocity;
 
-            // Kuş fiziksel
-            bird.velocity += bird.gravity;
-            bird.y += bird.velocity;
+                // Kuş çiz
+                ctx.fillStyle = 'yellow';
+                ctx.fillRect(bird.x, bird.y, bird.width, bird.height);
 
-            // Kuş çiz
-            ctx.fillStyle = 'yellow';
-            ctx.fillRect(bird.x, bird.y, bird.width, bird.height);
-
-            // Borular
-            if (frameCount % 150 === 0) { // Daha seyrek boru
-                createPipe();
-            }
-
-            for (let i = pipes.length - 1; i >= 0; i--) {
-                pipes[i].x -= 1; // Daha yavaş ilerleme
-
-                // Boru çiz
-                ctx.fillStyle = 'green';
-                ctx.fillRect(pipes[i].x, 0, pipeWidth, pipes[i].top);
-                ctx.fillRect(pipes[i].x, canvas.height - pipes[i].bottom, 
-                           pipeWidth, pipes[i].bottom);
-
-                // Skor
-                if (pipes[i].x + pipeWidth === bird.x) {
-                    score++;
+                // Borular
+                if (frameCount % 150 === 0) {
+                    createPipe();
                 }
 
-                // Boru ekran dışına çıkarsa sil
-                if (pipes[i].x < -pipeWidth) {
-                    pipes.splice(i, 1);
+                for (let i = pipes.length - 1; i >= 0; i--) {
+                    pipes[i].x -= 1;
+
+                    // Boru çiz
+                    ctx.fillStyle = 'green';
+                    ctx.fillRect(pipes[i].x, 0, pipeWidth, pipes[i].top);
+                    ctx.fillRect(pipes[i].x, canvas.height - pipes[i].bottom, 
+                               pipeWidth, pipes[i].bottom);
+
+                    // Skor
+                    if (pipes[i].x + pipeWidth === bird.x) {
+                        score++;
+                    }
+
+                    // Boru ekran dışına çıkarsa sil
+                    if (pipes[i].x < -pipeWidth) {
+                        pipes.splice(i, 1);
+                    }
                 }
+
+                // Skor göster
+                ctx.fillStyle = 'black';
+                ctx.font = '25px Arial';
+                ctx.fillText('Score: ' + score, 10, 40);
+
+                // Çarpışma kontrolü
+                if (checkCollision()) {
+                    gameOver = true;
+                }
+
+                frameCount++;
             }
 
-            // Skor göster
-            ctx.fillStyle = 'black';
-            ctx.font = '25px Arial';
-            ctx.fillText('Score: ' + score, 10, 40);
-
-            // Çarpışma kontrolü
-            if (checkCollision()) {
-                gameOver = true;
-            }
-
-            frameCount++;
             requestAnimationFrame(gameLoop);
         }
 
         // Kontroller
         document.addEventListener('keydown', (e) => {
             if (e.code === 'Space') {
-                if (!gameStarted) {
-                    gameStarted = true;
+                if (!gameStarted && !gameOver) {
+                    resetGame(); // Oyunu başlat
                 } else if (gameOver) {
-                    resetGame();
+                    resetGame(); // Yeniden başlat
                 } else {
-                    bird.velocity = bird.lift;
+                    bird.velocity = bird.lift; // Zıplama
                 }
             }
         });
