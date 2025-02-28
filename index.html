@@ -16,7 +16,6 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        // Oyun değişkenleri
         const bird = {
             x: 100,
             y: 300,
@@ -29,13 +28,12 @@
 
         const pipes = [];
         const pipeWidth = 80;
-        const pipeGap = 200;
+        const pipeGap = 250;  // Artırılmış boşluk
         let frameCount = 0;
         let score = 0;
         let gameStarted = false;
         let gameOver = false;
 
-        // Yeni boru oluşturma
         function createPipe() {
             const pipeHeight = Math.floor(Math.random() * (canvas.height - pipeGap - 150)) + 75;
             pipes.push({
@@ -45,7 +43,6 @@
             });
         }
 
-        // Çarpışma kontrolü
         function checkCollision() {
             if (bird.y < 0 || bird.y + bird.height > canvas.height) {
                 return true;
@@ -63,7 +60,6 @@
             return false;
         }
 
-        // Oyunu sıfırla
         function resetGame() {
             bird.y = 300;
             bird.velocity = 0;
@@ -74,9 +70,7 @@
             gameStarted = true;
         }
 
-        // Oyun döngüsü
         function gameLoop() {
-            // Canvas'ı temizle
             ctx.fillStyle = 'skyblue';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -92,45 +86,37 @@
                 ctx.font = '20px Arial';
                 ctx.fillText('Press SPACE to Restart', canvas.width/2 - 120, canvas.height/2 + 40);
             } else {
-                // Kuş fiziksel
                 bird.velocity += bird.gravity;
                 bird.y += bird.velocity;
 
-                // Kuş çiz
                 ctx.fillStyle = 'yellow';
                 ctx.fillRect(bird.x, bird.y, bird.width, bird.height);
 
-                // Borular
                 if (frameCount % 150 === 0) {
                     createPipe();
                 }
 
                 for (let i = pipes.length - 1; i >= 0; i--) {
-                    pipes[i].x -= 1;
+                    pipes[i].x -= 2;  // Hız artırıldı
 
-                    // Boru çiz
-                    ctx.fillStyle = 'green';
+                    ctx.fillStyle = 'pink';  // Pembe engeller
                     ctx.fillRect(pipes[i].x, 0, pipeWidth, pipes[i].top);
                     ctx.fillRect(pipes[i].x, canvas.height - pipes[i].bottom, 
                                pipeWidth, pipes[i].bottom);
 
-                    // Skor
                     if (pipes[i].x + pipeWidth === bird.x) {
                         score++;
                     }
 
-                    // Boru ekran dışına çıkarsa sil
                     if (pipes[i].x < -pipeWidth) {
                         pipes.splice(i, 1);
                     }
                 }
 
-                // Skor göster
                 ctx.fillStyle = 'black';
                 ctx.font = '25px Arial';
                 ctx.fillText('Score: ' + score, 10, 40);
 
-                // Çarpışma kontrolü
                 if (checkCollision()) {
                     gameOver = true;
                 }
@@ -141,20 +127,18 @@
             requestAnimationFrame(gameLoop);
         }
 
-        // Kontroller
         document.addEventListener('keydown', (e) => {
             if (e.code === 'Space') {
                 if (!gameStarted && !gameOver) {
-                    resetGame(); // Oyunu başlat
+                    resetGame();
                 } else if (gameOver) {
-                    resetGame(); // Yeniden başlat
+                    resetGame();
                 } else {
-                    bird.velocity = bird.lift; // Zıplama
+                    bird.velocity = bird.lift;
                 }
             }
         });
 
-        // Oyunu başlat
         gameLoop();
     </script>
 </body>
